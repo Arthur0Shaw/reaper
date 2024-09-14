@@ -1,5 +1,6 @@
 package com.money.reaper.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.authentication.AuthenticationManager;
 
+import com.money.reaper.config.JwtTokenService;
 import com.money.reaper.dto.LoginRequest;
 import com.money.reaper.dto.LoginResponse;
 import com.money.reaper.dto.UserRegistrationRequest;
@@ -25,17 +27,19 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final AuthenticationManager authenticationManager;
-	private final UserDetailsService userDetailsService;
 	private final PasswordEncoder passwordEncoder;
+	private final JwtTokenService jwtService;
+
 
 	public UserService(UserRepository userRepository, AuthenticationManager authenticationManager,
 			UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.authenticationManager = authenticationManager;
-		this.userDetailsService = userDetailsService;
 		this.passwordEncoder = passwordEncoder;
+		this.jwtService = new JwtTokenService();
 	}
 
+	
 	public User registerUser(UserRegistrationRequest request, HttpServletRequest httpRequest) {
 		// Check if the email already exists
 		Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
@@ -68,26 +72,27 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
-	public LoginResponse authenticateUser(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                )
-        );
+//	public LoginResponse authenticateUser(LoginRequest loginRequest) {
+//        Authentication authentication = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        loginRequest.getEmail(),
+//                        loginRequest.getPassword()
+//                )
+//        );
+//
+//        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//		String token = jwtService.generateToken(userDetails);
+//
+//        return new LoginResponse(token, "Login successful");
+//    }
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String token = generateToken(userDetails);
-
-        return new LoginResponse(token, "Login successful");
-    }
-
-    private String generateToken(UserDetails userDetails) {
-        // Implement your token generation logic here
-        return "dummy-token"; // Replace with actual token generation
-    }
+//    private String generateToken(UserDetails userDetails) {
+//        // Implement your token generation logic here
+//        return "dummy-token"; // Replace with actual token generation
+//    }
     
-	public User login(LoginRequest request) {
+
+	public LoginResponse login(LoginRequest request) {
 		User user = userRepository.findByEmail(request.getEmail())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
@@ -95,9 +100,14 @@ public class UserService {
 		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
 			throw new IllegalArgumentException("Invalid email or password");
 		}
+		String jwtToken = jwtService.generateToken(user);
 
-		return user; // You can return a JWT token instead in production
+		return new LoginResponse(jwtToken, "Login successful");
 	}
+	
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 
 	// Utility method to get the client's IP address
 	private String getClientIpAddress(HttpServletRequest request) {

@@ -4,8 +4,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.Collection;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,9 +19,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "users")
-public class User {
+public class User  implements UserDetails{
 
-    @Id
+	private static final long serialVersionUID = 8487924489549802637L;
+
+	@Id
     private String id;
 
     @NotBlank(message = "Business name is required")
@@ -48,4 +54,15 @@ public class User {
     private String uniqueId;
     private String apiKey;
     private String adminIpAddress;  // IP address of the admin who created the user
+    
+    
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public String getUsername() {
+		return email;
+	}
 }
