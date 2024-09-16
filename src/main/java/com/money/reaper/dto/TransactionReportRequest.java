@@ -7,14 +7,14 @@ import lombok.Data;
 
 @Data
 public class TransactionReportRequest {
-	
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
-    private LocalDate dateIndexStart;
-    private LocalDate dateIndexEnd;
-    private String status;
-    private String id;
-    private String acquirerReferenceId; 
-    private String merchantOrderId;
+
+	private LocalDateTime startDate;
+	private LocalDateTime endDate;
+	private LocalDate dateIndexStart;
+	private LocalDate dateIndexEnd;
+	private String status;
+	private String id;
+	private String acquirerReferenceId;
+	private String merchantOrderId;
 
 }

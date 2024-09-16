@@ -30,39 +30,39 @@ import jakarta.validation.Valid;
 @Validated
 public class UserController {
 
-    private final UserService userService;
+	private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+	public UserController(UserService userService) {
+		this.userService = userService;
+	}
 
-    @PostMapping("/register")
-    public ResponseEntity<User> register(@Valid @RequestBody UserRegistrationRequest request, HttpServletRequest httpRequest) {
-        User user = userService.registerUser(request, httpRequest);
-        return ResponseEntity.ok(user);
-    }
+	@PostMapping("/register")
+	public ResponseEntity<User> register(@Valid @RequestBody UserRegistrationRequest request,
+			HttpServletRequest httpRequest) {
+		User user = userService.registerUser(request, httpRequest);
+		return ResponseEntity.ok(user);
+	}
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        LoginResponse loginResponse = userService.login(request);
-        return ResponseEntity.ok(loginResponse);
-    }
-    
-    @GetMapping("/usersList")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
-    }
-    
-    
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
+	@PostMapping("/login")
+	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+		LoginResponse loginResponse = userService.login(request);
+		return ResponseEntity.ok(loginResponse);
+	}
+
+	@GetMapping("/usersList")
+	public ResponseEntity<List<User>> getAllUsers() {
+		List<User> users = userService.getAllUsers();
+		return ResponseEntity.ok(users);
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+		Map<String, String> errors = new HashMap<>();
+		ex.getBindingResult().getAllErrors().forEach((error) -> {
+			String fieldName = ((FieldError) error).getField();
+			String errorMessage = error.getDefaultMessage();
+			errors.put(fieldName, errorMessage);
+		});
+		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+	}
 }

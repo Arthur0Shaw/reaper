@@ -17,6 +17,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+
 @RequiredArgsConstructor
 @Service
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -28,7 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 			@NonNull FilterChain filterChain) throws ServletException, IOException {
-
 		final String authHeader = request.getHeader("Authorization");
 		final String jwt;
 		String userEmail;
@@ -36,7 +36,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			filterChain.doFilter(request, response);
 			return;
 		}
-
 		jwt = authHeader.substring(7);
 		userEmail = jwtService.extractUserName(jwt);
 		if (null != userEmail && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -50,5 +49,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 		filterChain.doFilter(request, response);
 	}
-
 }

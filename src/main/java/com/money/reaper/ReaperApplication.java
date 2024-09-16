@@ -9,5 +9,4 @@ public class ReaperApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ReaperApplication.class, args);
 	}
-
 }

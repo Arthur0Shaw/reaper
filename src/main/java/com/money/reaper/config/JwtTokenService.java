@@ -9,7 +9,6 @@ import java.util.function.Function;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -19,16 +18,15 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtTokenService {
-	
+
 	private static final String SECRET_KEY = "PJC7HnliwcxXw4FM8Ep3sX9NIL3R5CZnDvp8IyyCSlg=";
-	
+
 	Map<String, Object> extractClaims;
 
 	public String extractUserName(String token) {
-
 		return extractClaim(token, Claims::getSubject);
 	}
-	
+
 	public String generateToken(UserDetails userDetails) {
 		return generate(new HashMap<>(), userDetails);
 	}
@@ -39,7 +37,6 @@ public class JwtTokenService {
 				.setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
 				.signWith(getSignInKey(), SignatureAlgorithm.HS256).compact();
 	}
-    
 
 	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
 		final Claims claims = extractsAllClaims(token);
@@ -60,21 +57,16 @@ public class JwtTokenService {
 	}
 
 	public boolean isTokenValid(String token, UserDetails userDetail) {
-
 		final String username = extractUserName(token);
 		return (username.equals(userDetail.getUsername())) && !isTokenExpired(token);
-
 	}
 
 	private boolean isTokenExpired(String token) {
-
 		return extractExpiration(token).before(new Date());
 	}
 
 	private Date extractExpiration(String token) {
-
 		return extractClaim(token, Claims::getExpiration);
-
 	}
 
 }
