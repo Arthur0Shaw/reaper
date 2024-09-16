@@ -23,6 +23,7 @@ import com.money.reaper.dto.LoginRequest;
 import com.money.reaper.dto.LoginResponse;
 import com.money.reaper.dto.UserRegistrationRequest;
 import com.money.reaper.model.User;
+import com.money.reaper.model.UserLoginHistory;
 import com.money.reaper.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,9 +35,9 @@ import jakarta.validation.Valid;
 public class UserController {
 
 	private final UserService userService;
-	
-    @Autowired
-    public JwtTokenService jwtTokenService;
+
+	@Autowired
+	public JwtTokenService jwtTokenService;
 
 	public UserController(UserService userService) {
 		this.userService = userService;
@@ -50,22 +51,29 @@ public class UserController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-		LoginResponse loginResponse = userService.login(request);
+	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request,
+			HttpServletRequest httpRequest) {
+		LoginResponse loginResponse = userService.login(request, httpRequest);
 		return ResponseEntity.ok(loginResponse);
 	}
-	
+
 	@PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        jwtTokenService.invalidateToken(token);
-        return ResponseEntity.ok("Logged out successfully");
+	public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
+		String token = authHeader.substring(7);
+		jwtTokenService.invalidateToken(token);
+		return ResponseEntity.ok("Logged out successfully");
 	}
 
-	@GetMapping("/usersList")
+	@GetMapping("/merchantList")
 	public ResponseEntity<List<User>> getAllUsers() {
-		List<User> users = userService.getAllUsers();
+		List<User> users = userService.getAllMerchants();
 		return ResponseEntity.ok(users);
+	}
+
+	@GetMapping("/loginHistory")
+	public ResponseEntity<List<UserLoginHistory>> getAllLoginHistories() {
+		List<UserLoginHistory> loginHistory = userService.getAllLoginHistories();
+		return ResponseEntity.ok(loginHistory);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.money.reaper.dto.DashboardRequest;
+import com.money.reaper.dto.DashboardResponseData;
 import com.money.reaper.model.Transaction;
 import com.money.reaper.repository.TransactionRepository;
 
@@ -17,14 +19,14 @@ public class TransactionDao {
 	private TransactionRepository transactionRepository;
 
 	public List<Transaction> getAllTransactions() {
-		return transactionRepository.findAllByOrderByCreatedAtAsc();
+		return transactionRepository.findAllByOrderByCreatedAtDesc();
 	}
 
 	public List<Transaction> getTransactionsByCreatedAt(LocalDateTime startDate, LocalDateTime endDate) {
 		return transactionRepository.findByCreatedAtBetween(startDate, endDate);
 	}
 
-	public List<Transaction> getTransactionsByDateIndex(LocalDate startDate, LocalDate endDate) {
+	public List<Transaction> getTransactionsByDateIndex(String startDate, String endDate) {
 		return transactionRepository.findByDateIndexBetween(startDate, endDate);
 	}
 
@@ -32,5 +34,17 @@ public class TransactionDao {
 			String merchantOrderId) {
 		return transactionRepository.findByStatusAndIdAndAcquirerReferenceIdAndMerchantOrderId(status, id,
 				acquirerReferenceId, merchantOrderId);
+	}
+
+	public DashboardResponseData getDashboardData(DashboardRequest request) {
+		DashboardResponseData result = null;
+		if (request.getStatus() != null) {
+			result = transactionRepository.findAggregatedTransactionsByStatus(request.getStatus(),
+					request.getDateIndexFrom(), request.getDateIndexTo());
+		} else {
+			result = transactionRepository.findAllAggregatedTransactions(request.getDateIndexFrom(),
+					request.getDateIndexTo());
+		}
+		return result;
 	}
 }

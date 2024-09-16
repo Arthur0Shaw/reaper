@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.money.reaper.dao.TransactionDao;
+import com.money.reaper.dto.DashboardRequest;
 import com.money.reaper.dto.InitiateTransactionRequest;
 import com.money.reaper.dto.InitiateTransactionResponse;
 import com.money.reaper.dto.TransactionReportRequest;
@@ -89,15 +90,14 @@ public class TransactionController {
 	public ResponseEntity<?> getTransactionsDetails(@RequestBody TransactionReportRequest txnReportRequest) {
 		try {
 			List<Transaction> transactions;
-			if (txnReportRequest.getStartDate() != null && txnReportRequest.getEndDate() != null) {
-				transactions = transactionDao.getTransactionsByCreatedAt(txnReportRequest.getStartDate(),
-						txnReportRequest.getEndDate());
-			} else if (txnReportRequest.getDateIndexStart() != null && txnReportRequest.getDateIndexEnd() != null) {
-				transactions = transactionDao.getTransactionsByDateIndex(txnReportRequest.getDateIndexStart(),
-						txnReportRequest.getDateIndexEnd());
+			if (txnReportRequest.getDateIndexFrom() != null && txnReportRequest.getDateIndexTo() != null) {
+			    transactions = transactionDao.getTransactionsByDateIndex(
+			            txnReportRequest.getDateIndexFrom(),
+			            txnReportRequest.getDateIndexTo());
 			} else {
-				throw new IllegalArgumentException("At least one filter criteria must be provided.");
+			    throw new IllegalArgumentException("Date index filter criteria must be provided.");
 			}
+
 			Map<String, Object> response = new HashMap<>();
 			response.put("message", "Transaction report fetched successfully");
 			response.put("transactions", transactions);
@@ -112,4 +112,20 @@ public class TransactionController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 		}
 	}
+	
+	@PostMapping("/dashboard")
+	public ResponseEntity<?> getTransactionDashboardData(@RequestBody DashboardRequest dasbhoardRequest) {
+		try {
+			return ResponseEntity.ok(transactionDao.getDashboardData(dasbhoardRequest));
+		} catch (IllegalArgumentException e) {
+			Map<String, String> errorResponse = new HashMap<>();
+			errorResponse.put("message", e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+		} catch (Exception e) {
+			Map<String, String> errorResponse = new HashMap<>();
+			errorResponse.put("message", "An unexpected error occurred: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+		}
+	}
+
 }

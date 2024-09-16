@@ -3,6 +3,7 @@ package com.money.reaper.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,10 @@ import com.money.reaper.dto.LoginRequest;
 import com.money.reaper.dto.LoginResponse;
 import com.money.reaper.dto.UserRegistrationRequest;
 import com.money.reaper.model.User;
+import com.money.reaper.model.UserLoginHistory;
+import com.money.reaper.repository.UserLoginHistoryRepository;
 import com.money.reaper.repository.UserRepository;
+import com.money.reaper.util.DateTimeCreator;
 import com.money.reaper.util.KeyGeneratorUtil;
 import com.money.reaper.util.UserStatus;
 import com.money.reaper.util.UserType;
@@ -25,6 +29,9 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenService jwtService;
+
+	@Autowired
+	private UserLoginHistoryRepository userLoginHistoryRepository;
 
 	public UserService(UserRepository userRepository, UserDetailsService userDetailsService,
 			PasswordEncoder passwordEncoder) {
@@ -67,22 +74,43 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
-	public LoginResponse login(LoginRequest request) {
+	public LoginResponse login(LoginRequest request, HttpServletRequest httpRequest) {
 		User user = userRepository.findByEmail(request.getEmail())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
 
 		// Check if the password matches
 		if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+			saveLoginHistory(user, "Invalid email or password", httpRequest);
 			throw new IllegalArgumentException("Invalid email or password");
 		}
 		String jwtToken = jwtService.generateToken(user);
 
+		saveLoginHistory(user, "Login successful", httpRequest);
 		return new LoginResponse(jwtToken, "Login successful");
 	}
 
-	public List<User> getAllUsers() {
-		return userRepository.findAll();
+	private void saveLoginHistory(User user, String message, HttpServletRequest httpRequest) {
+		UserLoginHistory history = new UserLoginHistory();
+		history.setUserName(user.getBusinessName());
+		history.setUserId(user.getUniqueId());
+		history.setUserType(user.getUserType());
+		history.setDescription(message);
+		history.setIpAddress(getClientIpAddress(httpRequest));
+		history.setOs(getClientOs(httpRequest));
+		history.setBrowser(getClientBrowser(httpRequest));
+		history.setCreatedAt(DateTimeCreator.getDateTime());
+
+		userLoginHistoryRepository.save(history);
 	}
+
+	// Fetch only merchants with status active
+	public List<User> getAllMerchants() {
+		return userRepository.findByUserTypeAndUserStatus(UserType.MERCHANT, UserStatus.ACTIVE);
+	}
+	
+    public List<UserLoginHistory> getAllLoginHistories() {
+        return userLoginHistoryRepository.findAll();
+    }
 
 	// Utility method to get the client's IP address
 	private String getClientIpAddress(HttpServletRequest request) {
@@ -91,5 +119,41 @@ public class UserService {
 			ip = request.getRemoteAddr();
 		}
 		return ip;
+	}
+
+	private String getClientOs(HttpServletRequest request) {
+		String userAgent = request.getHeader("User-Agent");
+		if (userAgent != null) {
+			if (userAgent.contains("Windows")) {
+				return "Windows";
+			} else if (userAgent.contains("Mac")) {
+				return "Mac OS";
+			} else if (userAgent.contains("X11")) {
+				return "Unix";
+			} else if (userAgent.contains("Android")) {
+				return "Android";
+			} else if (userAgent.contains("iPhone")) {
+				return "iOS";
+			}
+		}
+		return "Unknown OS";
+	}
+
+	private String getClientBrowser(HttpServletRequest request) {
+		String userAgent = request.getHeader("User-Agent");
+		if (userAgent != null) {
+			if (userAgent.contains("MSIE") || userAgent.contains("Trident")) {
+				return "Internet Explorer";
+			} else if (userAgent.contains("Edge")) {
+				return "Edge";
+			} else if (userAgent.contains("Firefox")) {
+				return "Firefox";
+			} else if (userAgent.contains("Chrome")) {
+				return "Chrome";
+			} else if (userAgent.contains("Safari")) {
+				return "Safari";
+			}
+		}
+		return "Unknown Browser";
 	}
 }
