@@ -39,6 +39,7 @@ public class ReaperApplication {
 				user.setWhitelisted_ips("NA");
 				userRepository.save(user);
 				System.out.println("Admin user created successfully.");
+                System.out.println("Admin email: techadmin@gmail.com, pass: Tech@admin#901");
 			} else {
 				System.out.println("Admin user already exists.");
 			}
