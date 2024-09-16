@@ -17,6 +17,9 @@ import jakarta.validation.Valid;
 public class TransactionService {
 
 	@Autowired
+	private RequestRouter requestRouter;
+	
+	@Autowired
 	private UserRepository userRepository;
 
 	@Autowired
@@ -29,11 +32,11 @@ public class TransactionService {
 			Transaction transaction = modelMapper.map(request, Transaction.class);
 			User user = userRepository.findByUniqueId(request.getUniqueId());
 			Object validation[] = validateTransacationRequest.isValidTransactionRequest(transaction, user, ipAddress,
-					TransactionType.SALE);
+					TransactionType.SALE, request);
 			if (!(boolean) validation[0]) {
 				throw new RuntimeException((String) validation[1]);
 			}
-			
+			requestRouter.route(transaction);
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage());
 		}

@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/transaction")
 @Validated
 public class TransactionController {
-	
+
 	@Autowired
 	private TransactionDao transactionDao;
 
@@ -34,9 +34,10 @@ public class TransactionController {
 	private TransactionService transactionService;
 
 	@PostMapping("/initiateTransaction")
-	public ResponseEntity<?> initiateTransaction(@Valid @RequestBody InitiateTransactionRequest request, HttpServletRequest httpServletRequest) {
+	public ResponseEntity<?> initiateTransaction(@Valid @RequestBody InitiateTransactionRequest request,
+			HttpServletRequest httpServletRequest) {
 		try {
-            String ipAddress = httpServletRequest.getRemoteAddr();
+			String ipAddress = httpServletRequest.getRemoteAddr();
 			Transaction transaction = transactionService.initiateNewTransaction(request, ipAddress);
 			Map<String, Object> response = new HashMap<>();
 			response.put("message", "Transaction initiated successfully");
