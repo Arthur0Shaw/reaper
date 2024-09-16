@@ -1,4 +1,4 @@
-package com.money.reaper.service;
+package com.money.reaper.dao;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,11 +10,11 @@ import com.money.reaper.model.Transaction;
 import com.money.reaper.repository.TransactionRepository;
 
 @Service
-public class TransactionService {
+public class TransactionDao {
 
 	private final TransactionRepository transactionRepository;
 
-	public TransactionService(TransactionRepository transactionRepository) {
+	public TransactionDao(TransactionRepository transactionRepository) {
 		this.transactionRepository = transactionRepository;
 	}
 
