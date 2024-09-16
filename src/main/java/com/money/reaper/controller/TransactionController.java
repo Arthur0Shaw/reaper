@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.money.reaper.dao.TransactionDao;
 import com.money.reaper.dto.InitiateTransactionRequest;
+import com.money.reaper.dto.InitiateTransactionResponse;
 import com.money.reaper.dto.TransactionReportRequest;
 import com.money.reaper.model.Transaction;
 import com.money.reaper.service.TransactionService;
@@ -38,10 +39,28 @@ public class TransactionController {
 			HttpServletRequest httpServletRequest) {
 		try {
 			String ipAddress = httpServletRequest.getRemoteAddr();
-			Transaction transaction = transactionService.initiateNewTransaction(request, ipAddress);
+			InitiateTransactionResponse transactionResponse = transactionService.initiateNewTransaction(request, ipAddress);
 			Map<String, Object> response = new HashMap<>();
 			response.put("message", "Transaction initiated successfully");
-			response.put("transaction", transaction);
+			response.put("transaction", transactionResponse);
+			return ResponseEntity.ok(response); // Return success with transaction object
+		} catch (Exception e) {
+			Map<String, String> errorResponse = new HashMap<>();
+			errorResponse.put("message", "An unexpected error occurred: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+		}
+	}
+	
+	//TODO: Status update called by merchant
+	@PostMapping("/transactionStatus")
+	public ResponseEntity<?> transactionStatus(@Valid @RequestBody InitiateTransactionRequest request,
+			HttpServletRequest httpServletRequest) {
+		try {
+			String ipAddress = httpServletRequest.getRemoteAddr();
+
+			Map<String, Object> response = new HashMap<>();
+			response.put("message", "Transaction initiated successfully");
+			response.put("transaction", null);
 			return ResponseEntity.ok(response); // Return success with transaction object
 		} catch (Exception e) {
 			Map<String, String> errorResponse = new HashMap<>();
@@ -50,6 +69,22 @@ public class TransactionController {
 		}
 	}
 
+	//TODO: handle webhook from UPI Gateway
+	@PostMapping("/upiGatewayWebhook")
+	public ResponseEntity<?> upiGatewayWebhook(@Valid @RequestBody InitiateTransactionRequest request,
+			HttpServletRequest httpServletRequest) {
+		try {
+			String ipAddress = httpServletRequest.getRemoteAddr();
+
+			
+			return ResponseEntity.ok(null);
+		} catch (Exception e) {
+			Map<String, String> errorResponse = new HashMap<>();
+			errorResponse.put("message", "An unexpected error occurred: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+		}
+	}
+	
 	@PostMapping("/report")
 	public ResponseEntity<?> getTransactionsDetails(@RequestBody TransactionReportRequest txnReportRequest) {
 		try {

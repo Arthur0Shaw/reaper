@@ -46,6 +46,9 @@ public class Transaction {
 
     private String acquirerReferenceId;
     private String rrn;
+    
+    private String pgResponseCode;
+    private String pgResponseMessage;
     private String acquirerResponseCode;
     private String acquirerResponseMessage;
 
@@ -81,16 +84,18 @@ public class Transaction {
 
     @Size(max = 255, message = "UDF4 should be at most 255 characters")
     private String udf4;
+    
+    private String intentURL;
 
     @NotBlank(message = "Created_at is required")
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$", message = "Created at date must be in the format YYYY-MM-DD HH:mm:ss")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     @NotBlank(message = "Updated_at is required")
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$", message = "Updated at date must be in the format YYYY-MM-DD HH:mm:ss")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     @NotBlank(message = "Updated_at is required")
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Updated at date must be in the format YYYY-MM-DD")
-    private LocalDate dateIndex;
+    private String dateIndex;
 }

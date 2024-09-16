@@ -15,7 +15,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 import java.util.Arrays;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -37,7 +36,10 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable())
 				.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(requests -> requests
-						.requestMatchers("/api/v1/users/register", "/api/v1/users/login").permitAll() // Allow register																		// authentication
+						.requestMatchers("/api/v1/users/register", "/api/v1/users/login",
+								"/api/v1/transaction/initiateTransaction", "/api/v1/transaction/transactionStatus",
+								"/api/v1/transaction/upiGatewayWebhook")
+						.permitAll() // Allow register // authentication
 						.anyRequest().authenticated()) // All other requests must be authenticated
 				// JWT authentication and filter setup
 				.authenticationProvider(authenticationProvider)
@@ -46,18 +48,18 @@ public class SecurityConfig {
 				.formLogin(login -> login.disable()).httpBasic(basic -> basic.disable());
 		return http.build();
 	}
-	
-    @Bean
-    public CorsFilter corsFilter() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
-        config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
+	@Bean
+	public CorsFilter corsFilter() {
+		CorsConfiguration config = new CorsConfiguration();
+		config.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+		config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
+		config.setAllowedHeaders(Arrays.asList("*"));
+		config.setAllowCredentials(true);
+		config.setMaxAge(3600L);
+
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", config);
+		return new CorsFilter(source);
+	}
 }
