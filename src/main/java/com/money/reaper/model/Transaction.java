@@ -3,8 +3,13 @@ package com.money.reaper.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.money.reaper.util.TransactionStatus;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -51,9 +56,10 @@ public class Transaction {
 	@Size(min = 2, message = "Name should have at least 2 characters")
 	private String name;
 
+	@Enumerated(EnumType.STRING)
 	@NotBlank(message = "Status is required")
 	@Pattern(regexp = "^[a-zA-Z]+$", message = "Status must contain only alphabetic characters")
-	private String status;
+	private TransactionStatus status;
 
 	@Size(max = 255, message = "UDF1 should be at most 255 characters")
 	private String udf1;
