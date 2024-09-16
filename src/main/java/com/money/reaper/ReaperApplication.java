@@ -6,11 +6,15 @@ import org.springframework.context.annotation.Bean;
 
 import com.money.reaper.model.User;
 import com.money.reaper.repository.UserRepository;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 
 @SpringBootApplication
 public class ReaperApplication {
+	
+	@Autowired
+	public PasswordEncoder passwordEncoder;
 
 	public static void main(String[] args) {
 		SpringApplication.run(ReaperApplication.class, args);
@@ -25,7 +29,7 @@ public class ReaperApplication {
 				user.setBusiness_name("Tech Business");
 				user.setEmail("techadmin@gmail.com");
 				user.setMobile("9999999999");
-				user.setPassword("Tech@admin#901"); 
+				user.setPassword(passwordEncoder.encode("Tech@admin#901")); 
 				user.setContact_person_name("admin");
 				user.setUserType("ADMIN");
 				user.setUserStatus("ACTIVE");
