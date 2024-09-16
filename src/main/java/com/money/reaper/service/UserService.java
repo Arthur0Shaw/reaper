@@ -3,7 +3,6 @@ package com.money.reaper.service;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,14 +23,12 @@ import jakarta.servlet.http.HttpServletRequest;
 public class UserService {
 
 	private final UserRepository userRepository;
-	private final AuthenticationManager authenticationManager;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenService jwtService;
 
-	public UserService(UserRepository userRepository, AuthenticationManager authenticationManager,
-			UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+	public UserService(UserRepository userRepository, UserDetailsService userDetailsService,
+			PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
-		this.authenticationManager = authenticationManager;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtService = new JwtTokenService();
 	}

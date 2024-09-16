@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.money.reaper.config.JwtTokenService;
 import com.money.reaper.dto.LoginRequest;
 import com.money.reaper.dto.LoginResponse;
 import com.money.reaper.dto.UserRegistrationRequest;
@@ -31,6 +34,9 @@ import jakarta.validation.Valid;
 public class UserController {
 
 	private final UserService userService;
+	
+    @Autowired
+    public JwtTokenService jwtTokenService;
 
 	public UserController(UserService userService) {
 		this.userService = userService;
@@ -47,6 +53,13 @@ public class UserController {
 	public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
 		LoginResponse loginResponse = userService.login(request);
 		return ResponseEntity.ok(loginResponse);
+	}
+	
+	@PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        jwtTokenService.invalidateToken(token);
+        return ResponseEntity.ok("Logged out successfully");
 	}
 
 	@GetMapping("/usersList")
