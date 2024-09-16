@@ -38,5 +38,6 @@ dependencies {
     implementation 'com.google.zxing:javase:3.5.1'
     compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
     implementation 'javax.persistence:javax.persistence-api:2.2'
+    implementation 'org.modelmapper:modelmapper:3.2.1'
     
 }

@@ -20,4 +20,6 @@ public interface UserRepository extends MongoRepository<User, String> {
 	boolean existsByMobile(String mobile);
 
 	List<User> findAll();
+	
+	User findByUniqueId(String uniqueId);
 }

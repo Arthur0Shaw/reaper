@@ -10,8 +10,12 @@ import lombok.Data;
 @Data
 public class InitiateTransactionRequest {
 
+	@NotNull(message = "UniqueId is mandatory")
+    @Pattern(regexp = "^[a-zA-Z0-9]{16}$", message = "UniqueId must be the one provided at the time of onboarding it is 16 characters long")
+	private String uniqueId;
+	
     @NotNull(message = "Hash is mandatory")
-    @Pattern(regexp = "^[a-zA-Z0-9]{64}$", message = "Hash must be alphanumeric and 64 characters long")
+    @Pattern(regexp = "^[a-zA-Z0-9]{32}$", message = "Hash must be alphanumeric and 32 characters long")
     private String hash;
 
     @NotNull(message = "Client Transaction ID is mandatory")

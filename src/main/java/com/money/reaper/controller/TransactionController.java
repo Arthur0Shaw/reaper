@@ -19,6 +19,7 @@ import com.money.reaper.dto.TransactionReportRequest;
 import com.money.reaper.model.Transaction;
 import com.money.reaper.service.TransactionService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -33,9 +34,10 @@ public class TransactionController {
 	private TransactionService transactionService;
 
 	@PostMapping("/initiateTransaction")
-	public ResponseEntity<?> initiateTransaction(@Valid @RequestBody InitiateTransactionRequest request) {
+	public ResponseEntity<?> initiateTransaction(@Valid @RequestBody InitiateTransactionRequest request, HttpServletRequest httpServletRequest) {
 		try {
-			Transaction transaction = transactionService.initiateNewTransaction(request);
+            String ipAddress = httpServletRequest.getRemoteAddr();
+			Transaction transaction = transactionService.initiateNewTransaction(request, ipAddress);
 			Map<String, Object> response = new HashMap<>();
 			response.put("message", "Transaction initiated successfully");
 			response.put("transaction", transaction);

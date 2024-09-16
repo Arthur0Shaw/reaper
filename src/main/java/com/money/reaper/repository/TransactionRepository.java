@@ -14,14 +14,15 @@ import com.money.reaper.model.Transaction;
 @Repository
 public interface TransactionRepository extends MongoRepository<Transaction, String> {
 
-//    List<Transaction> findAllByOrderByCreatedAtAsc();
-//
-//    List<Transaction> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
-//
-//    List<Transaction> findByDateIndexBetween(LocalDate startDate, LocalDate endDate);
-//
-//    List<Transaction> findByStatusAndIdAndAcquirerReferenceIdAndMerchantOrderId(String status, String id,
-//            String acquirerReferenceId, String merchantOrderId);
+	List<Transaction> findAllByOrderByCreatedAtAsc();
 
+	List<Transaction> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
+
+	List<Transaction> findByDateIndexBetween(LocalDate startDate, LocalDate endDate);
+
+	List<Transaction> findByStatusAndIdAndAcquirerReferenceIdAndMerchantOrderId(String status, String id,
+			String acquirerReferenceId, String merchantOrderId);
+
+	List<Transaction> findByUniqueIdAndMerchantOrderId(String uniqueId, String merchantOrderId);
 
 }

@@ -15,6 +15,8 @@ import com.money.reaper.dto.UserRegistrationRequest;
 import com.money.reaper.model.User;
 import com.money.reaper.repository.UserRepository;
 import com.money.reaper.util.KeyGeneratorUtil;
+import com.money.reaper.util.UserStatus;
+import com.money.reaper.util.UserType;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -47,22 +49,22 @@ public class UserService {
 
 		// Create new user
 		User user = new User();
-		user.setBusiness_name(request.getBusiness_name());
+		user.setBusinessName(request.getBusiness_name());
 		user.setEmail(request.getEmail());
 		user.setMobile(request.getMobile());
 		user.setPassword(passwordEncoder.encode(request.getPassword())); // Encrypt the password
-		user.setContact_person_name(request.getContact_person_name());
+		user.setContactPersonName(request.getContact_person_name());
 		user.setGstin(request.getGstin());
 		user.setPan(request.getPan());
 		user.setWebsite(request.getWebsite());
-		user.setWebhoook_url(request.getWebhook_url());
-		user.setWhitelisted_ips(request.getWhitelisted_ips());
+		user.setWebhookUrl(request.getWebhook_url());
+		user.setWhitelistedIps(request.getWhitelisted_ips());
 
 		// Set additional fields
 		user.setUniqueId(uniqueId);
 		user.setApiKey(apiKey);
-		user.setUserType("MERCHANT");
-		user.setUserStatus("ACTIVE");
+		user.setUserType(UserType.MERCHANT);
+		user.setUserStatus(UserStatus.ACTIVE);
 		user.setAdminIpAddress(getClientIpAddress(httpRequest)); // Store admin's IP address
 
 		return userRepository.save(user);

@@ -17,25 +17,20 @@ public class TransactionDao {
 	private TransactionRepository transactionRepository;
 
 	public List<Transaction> getAllTransactions() {
-		//return transactionRepository.findAllByOrderByCreatedAtAsc();
-		
-		return null;
+		return transactionRepository.findAllByOrderByCreatedAtAsc();
 	}
 
 	public List<Transaction> getTransactionsByCreatedAt(LocalDateTime startDate, LocalDateTime endDate) {
-		//return transactionRepository.findByCreatedAtBetween(startDate, endDate);
-		return null;
+		return transactionRepository.findByCreatedAtBetween(startDate, endDate);
 	}
 
 	public List<Transaction> getTransactionsByDateIndex(LocalDate startDate, LocalDate endDate) {
-		//return transactionRepository.findByDateIndexBetween(startDate, endDate);
-		return null;
+		return transactionRepository.findByDateIndexBetween(startDate, endDate);
 	}
 
 	public List<Transaction> getTransactionsByFilters(String status, String id, String acquirerReferenceId,
 			String merchantOrderId) {
-//		return transactionRepository.findByStatusAndIdAndAcquirerReferenceIdAndMerchantOrderId(status, id,
-//				acquirerReferenceId, merchantOrderId);
-				return null;
+		return transactionRepository.findByStatusAndIdAndAcquirerReferenceIdAndMerchantOrderId(status, id,
+				acquirerReferenceId, merchantOrderId);
 	}
 }
