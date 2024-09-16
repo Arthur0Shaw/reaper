@@ -28,4 +28,6 @@ public class UserRegistrationRequest {
 	private String gstin;
 	private String pan;
 	private String website;
+	private String webhook_url;
+	private String whitelisted_ips;
 }

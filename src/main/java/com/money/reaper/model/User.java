@@ -53,6 +53,8 @@ public class User implements UserDetails {
 	private String uniqueId;
 	private String apiKey;
 	private String adminIpAddress; // IP address of the admin who created the user
+	private String webhoook_url;
+	private String whitelisted_ips;
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -55,6 +55,8 @@ public class UserService {
 		user.setGstin(request.getGstin());
 		user.setPan(request.getPan());
 		user.setWebsite(request.getWebsite());
+		user.setWebhoook_url(request.getWebhook_url());
+		user.setWhitelisted_ips(request.getWhitelisted_ips());
 
 		// Set additional fields
 		user.setUniqueId(uniqueId);
