@@ -53,6 +53,8 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 	Transaction findByMerchantOrderIdAndUniqueId(String merchantOrderId, String uniqueId);
 
 	Transaction findByPgOrderIdAndUniqueId(String pgOrderId, String uniqueId);
+	
+	Transaction findByPgOrderId(String pgOrderId);
 
 	Transaction findByMerchantOrderIdAndPgOrderIdAndUniqueId(String merchantOrderId, String pgOrderId, String uniqueId);
 

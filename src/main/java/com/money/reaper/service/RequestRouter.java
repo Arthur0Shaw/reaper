@@ -71,6 +71,17 @@ public class RequestRouter {
 		return saveAndReturnTransaction(transaction);
 	}
 
+	public void handleWebhook(String webhookPayload, String acquirer) {
+		try {
+			if (acquirer.equalsIgnoreCase("UPI_GATEWAY")) {
+				Transaction	transaction = upiGatewayProcessor.handleWebhook(webhookPayload);
+				transactionRepository.save(transaction);
+			}
+		} catch (Exception e) {
+			logger.error("Transaction status enquiry failed", e);
+		}
+	}
+
 	private void setTransactionError(Transaction transaction) {
 		transaction.setStatus(TransactionStatus.FAILURE);
 		transaction.setPgResponseCode(TransactionStatus.FAILURE.getCode());

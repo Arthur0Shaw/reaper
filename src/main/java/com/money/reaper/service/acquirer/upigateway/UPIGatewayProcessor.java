@@ -4,7 +4,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -23,15 +27,11 @@ import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.money.reaper.model.Transaction;
+import com.money.reaper.repository.TransactionRepository;
 import com.money.reaper.util.DateTimeCreator;
 import com.money.reaper.util.TransactionStatus;
 
 import io.micrometer.common.util.StringUtils;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 @Service
 public class UPIGatewayProcessor {
@@ -50,6 +50,9 @@ public class UPIGatewayProcessor {
 
 	@Value("${UPIGateway.statusURL}")
 	private String upiGatewayStatusURL;
+
+	@Autowired
+	private TransactionRepository transactionRepository;
 
 	public Transaction initiatePayment(Transaction transaction) {
 		try {
@@ -185,5 +188,47 @@ public class UPIGatewayProcessor {
 		transaction.setStatus(TransactionStatus.FAILURE);
 		transaction.setPgResponseCode(TransactionStatus.FAILURE.getCode());
 		transaction.setPgResponseMessage(TransactionStatus.FAILURE.getDisplayName());
+	}
+
+	public Transaction handleWebhook(String webhookPayload) {
+		Map<String, String> keyValueMap = extractQueryParams(webhookPayload);
+		Transaction transaction = transactionRepository.findByPgOrderId(getSafeValue(keyValueMap, "client_txn_id"));
+		String status = getSafeValue(keyValueMap, "status");
+		transaction.setCustomerUpiId(getSafeValue(keyValueMap, "customer_vpa"));
+		transaction.setRrn(getSafeValue(keyValueMap, "upi_txn_id"));
+		transaction.setAcquirerResponseMessage(getSafeValue(keyValueMap, "remark"));
+		transaction.setMerchantUpiId(getSafeValue(keyValueMap, "upi_id"));
+
+		if (status.equalsIgnoreCase("Success")) {
+			transaction.setStatus(TransactionStatus.SUCCESS);
+			transaction.setPgResponseCode(TransactionStatus.SUCCESS.getCode());
+			transaction.setPgResponseMessage(TransactionStatus.SUCCESS.getDisplayName());
+		} else if (status.equalsIgnoreCase("Failure") || status.equalsIgnoreCase("Close")) {
+			transaction.setStatus(TransactionStatus.FAILURE);
+			transaction.setPgResponseCode(TransactionStatus.FAILURE.getCode());
+			transaction.setPgResponseMessage(TransactionStatus.FAILURE.getDisplayName());
+		} else {
+			transaction.setStatus(TransactionStatus.PENDING);
+			transaction.setPgResponseCode(TransactionStatus.PENDING.getCode());
+			transaction.setPgResponseMessage(TransactionStatus.PENDING.getDisplayName());
+		}
+		return transaction;
+	}
+
+	private Map<String, String> extractQueryParams(String queryString) {
+		Map<String, String> keyValueMap = new HashMap<>();
+		String[] pairs = queryString.split("&");
+		for (String pair : pairs) {
+			String[] keyValue = pair.split("=", 2);
+			String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+			String value = keyValue.length > 1 ? URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8) : "";
+			keyValueMap.put(key, value);
+		}
+		return keyValueMap;
+	}
+
+	private String getSafeValue(Map<String, String> keyValueMap, String key) {
+		String value = keyValueMap.getOrDefault(key, "");
+		return value.isEmpty() ? "NA" : value;
 	}
 }

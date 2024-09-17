@@ -1,5 +1,8 @@
 package com.money.reaper.controller;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +44,8 @@ public class TransactionController {
 			HttpServletRequest httpServletRequest) {
 		try {
 			String ipAddress = httpServletRequest.getRemoteAddr();
-			InitiateTransactionResponse transactionResponse = transactionService.initiateNewTransaction(request, ipAddress);
+			InitiateTransactionResponse transactionResponse = transactionService.initiateNewTransaction(request,
+					ipAddress);
 			Map<String, Object> response = new HashMap<>();
 			response.put("message", "Transaction initiated successfully");
 			response.put("transaction", transactionResponse);
@@ -52,14 +56,33 @@ public class TransactionController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 		}
 	}
-	
-	//TODO: Status update called by merchant
+
+	@PostMapping("/upiGatewayWebhook")
+	public ResponseEntity<?> upiGatewayWebhook(HttpServletRequest httpServletRequest) {
+		try {
+			StringBuilder payloadBuilder = new StringBuilder();
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(httpServletRequest.getInputStream(), StandardCharsets.UTF_8))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					payloadBuilder.append(line);
+				}
+			}
+			String payload = payloadBuilder.toString();
+			transactionService.handleAcquirerWebhook(payload, "UPI_GATEWAY");
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		}
+	}
+
 	@PostMapping("/transactionStatus")
 	public ResponseEntity<?> transactionStatus(@Valid @RequestBody StatusEnquiryRequest request,
 			HttpServletRequest httpServletRequest) {
 		try {
 			String ipAddress = httpServletRequest.getRemoteAddr();
-			InitiateTransactionResponse  transactionStatusResponse = transactionService.transactionStatusUpdate(request, ipAddress);
+			InitiateTransactionResponse transactionStatusResponse = transactionService.transactionStatusUpdate(request,
+					ipAddress);
 			Map<String, Object> response = new HashMap<>();
 			response.put("message", "success");
 			response.put("transaction", transactionStatusResponse);
@@ -71,32 +94,15 @@ public class TransactionController {
 		}
 	}
 
-	//TODO: handle webhook from UPI Gateway
-	@PostMapping("/upiGatewayWebhook")
-	public ResponseEntity<?> upiGatewayWebhook(@Valid @RequestBody InitiateTransactionRequest request,
-			HttpServletRequest httpServletRequest) {
-		try {
-			String ipAddress = httpServletRequest.getRemoteAddr();
-
-			
-			return ResponseEntity.ok(null);
-		} catch (Exception e) {
-			Map<String, String> errorResponse = new HashMap<>();
-			errorResponse.put("message", "An unexpected error occurred: " + e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-		}
-	}
-	
 	@PostMapping("/report")
 	public ResponseEntity<?> getTransactionsDetails(@RequestBody TransactionReportRequest txnReportRequest) {
 		try {
 			List<Transaction> transactions;
 			if (txnReportRequest.getDateIndexFrom() != null && txnReportRequest.getDateIndexTo() != null) {
-			    transactions = transactionDao.getTransactionsByDateIndex(
-			            txnReportRequest.getDateIndexFrom(),
-			            txnReportRequest.getDateIndexTo());
+				transactions = transactionDao.getTransactionsByDateIndex(txnReportRequest.getDateIndexFrom(),
+						txnReportRequest.getDateIndexTo());
 			} else {
-			    throw new IllegalArgumentException("Date index filter criteria must be provided.");
+				throw new IllegalArgumentException("Date index filter criteria must be provided.");
 			}
 
 			Map<String, Object> response = new HashMap<>();
@@ -113,7 +119,7 @@ public class TransactionController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
 		}
 	}
-	
+
 	@PostMapping("/dashboard")
 	public ResponseEntity<?> getTransactionDashboardData(@RequestBody DashboardRequest dasbhoardRequest) {
 		try {

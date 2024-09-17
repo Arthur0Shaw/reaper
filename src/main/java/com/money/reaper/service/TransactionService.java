@@ -1,5 +1,10 @@
 package com.money.reaper.service;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +23,7 @@ import com.money.reaper.util.TransactionType;
 import com.money.reaper.util.ValidateStatusEnquiryRequest;
 import com.money.reaper.util.ValidateTransacationRequest;
 
+import io.jsonwebtoken.io.IOException;
 import jakarta.validation.Valid;
 
 @Service
@@ -103,5 +109,13 @@ public class TransactionService {
 			throw new RuntimeException(e.getMessage());
 		}
 		return tansactionStatusResponse;
+	}
+
+	public void handleAcquirerWebhook(String webhookPayload, String acquirer) {
+		try {
+			requestRouter.handleWebhook(webhookPayload, acquirer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
