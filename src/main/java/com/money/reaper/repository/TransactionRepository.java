@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
@@ -21,10 +20,7 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
 	List<Transaction> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
 
-    @Aggregation(pipeline = {
-            "{ $match: { 'dateIndex': { $gte: ?0, $lte: ?1 } } }",
-            "{ $sort: { 'createdAt': -1 } }"
-        })
+	@Aggregation(pipeline = { "{ $match: { 'dateIndex': { $gte: ?0, $lte: ?1 } } }", "{ $sort: { 'createdAt': -1 } }" })
 	List<Transaction> findByDateIndexBetween(String dateIndexFrom, String dateIndexTo);
 
 	List<Transaction> findByStatusAndIdAndAcquirerReferenceIdAndMerchantOrderId(String status, String id,
@@ -52,5 +48,11 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 					+ "dateWiseTransactionAmount: { $arrayToObject: '$dateWiseTransactionAmount' } } }" })
 	DashboardResponseData findAggregatedTransactionsByStatus(TransactionStatus status, String dateIndexFrom,
 			String dateIndexTo);
+
+	Transaction findByMerchantOrderIdAndUniqueId(String merchantOrderId, String uniqueId);
+
+	Transaction findByPgOrderIdAndUniqueId(String pgOrderId, String uniqueId);
+
+	Transaction findByMerchantOrderIdAndPgOrderIdAndUniqueId(String merchantOrderId, String pgOrderId, String uniqueId);
 
 }
