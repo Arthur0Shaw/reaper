@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
@@ -55,4 +56,6 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
 	Transaction findByMerchantOrderIdAndPgOrderIdAndUniqueId(String merchantOrderId, String pgOrderId, String uniqueId);
 
+	@Query("{ 'status': ?0, 'createdAt': { $lte: ?1 } }")
+	List<Transaction> findByStatusAndCreatedAtLessThanEqual(TransactionStatus status, String createdAtThreshold);
 }

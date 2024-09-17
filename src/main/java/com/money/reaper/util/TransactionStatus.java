@@ -7,7 +7,7 @@ public enum TransactionStatus {
 
     PENDING("PENDING", "T0"),
     SUCCESS("SUCCESS", "T1"),
-    ERROR("ERROR", "T3");
+    FAILURE("FAILURE", "T3");
 
     private final String displayName;
     private final String code;

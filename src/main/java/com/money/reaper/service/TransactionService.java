@@ -62,7 +62,7 @@ public class TransactionService {
 			if (!(boolean) validation[0]) {
 				throw new RuntimeException((String) validation[1]);
 			}
-			transaction = requestRouter.route(transaction);
+			transaction = requestRouter.routeNewTransaction(transaction);
 
 			initiateTransactionResponse = modelMapper.map(transaction, InitiateTransactionResponse.class);
 		} catch (Exception e) {

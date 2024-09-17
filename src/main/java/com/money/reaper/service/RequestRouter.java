@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.money.reaper.model.Transaction;
 import com.money.reaper.repository.TransactionRepository;
 import com.money.reaper.service.acquirer.AcquirerManagerFactory;
-import com.money.reaper.service.acquirer.UPIGatewayProcessor;
+import com.money.reaper.service.acquirer.upigateway.UPIGatewayProcessor;
 import com.money.reaper.util.TransactionStatus;
 
 import io.micrometer.common.util.StringUtils;
@@ -27,7 +27,7 @@ public class RequestRouter {
 
 	private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
 
-	public Transaction route(Transaction transaction) {
+	public Transaction routeNewTransaction(Transaction transaction) {
 		if (transaction == null) {
 			throw new IllegalArgumentException("Transaction cannot be null");
 		}
@@ -45,6 +45,7 @@ public class RequestRouter {
 			return saveAndReturnTransaction(transaction);
 		}
 		try {
+			transaction.setAcquirer(acquirer);
 			if (acquirer.equalsIgnoreCase("UPI_GATEWAY")) {
 				transaction = upiGatewayProcessor.initiatePayment(transaction);
 			}
@@ -55,10 +56,25 @@ public class RequestRouter {
 		return saveAndReturnTransaction(transaction);
 	}
 
+	public Transaction routeTransactionStatusEnquiry(Transaction transaction) {
+		try {
+			if (transaction == null) {
+				throw new IllegalArgumentException("Transaction cannot be null");
+			}
+			String acquirer = transaction.getAcquirer();
+			if (acquirer.equalsIgnoreCase("UPI_GATEWAY")) {
+				transaction = upiGatewayProcessor.initiatePaymentStatus(transaction);
+			}
+		} catch (Exception e) {
+			logger.error("Transaction status enquiry failed", e);
+		}
+		return saveAndReturnTransaction(transaction);
+	}
+
 	private void setTransactionError(Transaction transaction) {
-		transaction.setStatus(TransactionStatus.ERROR);
-		transaction.setPgResponseCode(TransactionStatus.ERROR.getCode());
-		transaction.setPgResponseMessage(TransactionStatus.ERROR.getDisplayName());
+		transaction.setStatus(TransactionStatus.FAILURE);
+		transaction.setPgResponseCode(TransactionStatus.FAILURE.getCode());
+		transaction.setPgResponseMessage(TransactionStatus.FAILURE.getDisplayName());
 	}
 
 	private Transaction saveAndReturnTransaction(Transaction transaction) {

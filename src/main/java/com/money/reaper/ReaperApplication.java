@@ -5,6 +5,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.money.reaper.model.User;
@@ -12,6 +13,7 @@ import com.money.reaper.repository.UserRepository;
 import com.money.reaper.util.UserStatus;
 import com.money.reaper.util.UserType;
 
+@EnableScheduling
 @SpringBootApplication
 public class ReaperApplication {
 

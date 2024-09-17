@@ -40,6 +40,8 @@ public class Transaction {
 
     @NotBlank(message = "Merchant UPI ID is required")
     private String merchantUpiId;
+    
+    private String customerUpiId;
 
     private String acquirerReferenceId;
     private String rrn;
@@ -81,6 +83,8 @@ public class Transaction {
 
     @Size(max = 255, message = "UDF4 should be at most 255 characters")
     private String udf4;
+    
+    private String acquirer;
     
     private String intentURL;
 
