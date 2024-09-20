@@ -17,7 +17,7 @@ import java.util.Base64;
 public class QRCodeDecoderFromURL {
 
     public static void main(String[] args) {
-        String urlString = "https://merchant.upigateway.com/gateway/pay/4e0f4ba21b0d1194ec6896dd19a113bc";  // URL of the HTML page
+        String urlString = "https://merchant.upigateway.com/gateway/pay/1a10560548d2d2ecccfac1f9e646b4b5";  // URL of the HTML page
 
         try {
             // Fetch the HTML from the provided URL
