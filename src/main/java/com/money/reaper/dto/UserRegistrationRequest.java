@@ -30,4 +30,5 @@ public class UserRegistrationRequest {
 	private String website;
 	private String webhook_url;
 	private String whitelisted_ips;
+	private String banks;
 }

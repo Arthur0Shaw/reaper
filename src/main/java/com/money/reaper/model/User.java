@@ -63,6 +63,7 @@ public class User implements UserDetails {
     private String adminIpAddress;
     private String webhookUrl;
     private String whitelistedIps;
+    private String banks;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

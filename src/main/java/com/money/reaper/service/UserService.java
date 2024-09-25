@@ -63,6 +63,7 @@ public class UserService {
 		user.setWebsite(request.getWebsite());
 		user.setWebhookUrl(request.getWebhook_url());
 		user.setWhitelistedIps(request.getWhitelisted_ips());
+		user.setBanks(request.getBanks());
 
 		// Set additional fields
 		user.setUniqueId(uniqueId);
