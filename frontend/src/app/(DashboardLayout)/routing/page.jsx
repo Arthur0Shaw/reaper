@@ -13,16 +13,23 @@ import {
   Button,
   InputAdornment,
   Paper,
-  IconButton,
 } from "@mui/material";
 import { AccountBalance, TrendingUp, AttachMoney } from "@mui/icons-material"; // Icons
-import { toast } from "react-toastify";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";  // Import ToastContainer and toast
+import "react-toastify/dist/ReactToastify.css";  // Import Toast styles
 
 const RoutingPage = () => {
   const [selectedBank, setSelectedBank] = useState(""); // Bank dropdown state
   const [transactionCount, setTransactionCount] = useState("");
   const [thresholdAmount, setThresholdAmount] = useState("");
   const [maxTransactionAmount, setMaxTransactionAmount] = useState("");
+  const [errors, setErrors] = useState({
+    bank: false,
+    transactionCount: false,
+    thresholdAmount: false,
+    maxTransactionAmount: false,
+  });
 
   // Bank options
   const bankOptions = ["Yes Bank", "SBI", "HDFC", "ICICI", "BOB", "Bandhan Bank", "IDFC", "Axis Bank"];
@@ -30,20 +37,51 @@ const RoutingPage = () => {
   // Handle dropdown change
   const handleBankChange = (event) => {
     setSelectedBank(event.target.value);
+    if (event.target.value) setErrors((prev) => ({ ...prev, bank: false }));
   };
 
   // Handle save action
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedBank || !transactionCount || !thresholdAmount || !maxTransactionAmount) {
-      toast.error('Please fill out all fields');
-    } else {
-      toast.success('Routing details saved successfully!');
-      // Save logic here
+      setErrors({
+        bank: !selectedBank,
+        transactionCount: !transactionCount,
+        thresholdAmount: !thresholdAmount,
+        maxTransactionAmount: !maxTransactionAmount,
+      });
+      toast.error("Please fill out all fields");
+      return;
+    }
+
+    const payload = {
+      bank: selectedBank,
+      totalTxnCount: transactionCount,
+      thresholdTxnAmount: thresholdAmount,
+      maximumTxnAmount: maxTransactionAmount,
+    };
+
+    try {
+      const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
+      const response = await axios.post("http://localhost:8080/api/v1/acquirer/txnRoutingDetails", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Routing details saved successfully!");
+      } else {
+        toast.error("Failed to save routing details. Please try again.");
+      }
+    } catch (error) {
+      toast.error("Error occurred. Please try again.");
+      console.error("API error:", error);
     }
   };
 
   return (
     <Box>
+      <ToastContainer />  {/* ToastContainer added here */}
       <Paper
         elevation={3}
         sx={{
@@ -51,8 +89,7 @@ const RoutingPage = () => {
           backgroundColor: "#ffffff",
           borderRadius: "16px",
           boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)",
-          minWidth: '100vh',
-          // margin: 'auto', // Centering the card
+          minWidth: "100vh",
         }}
       >
         <Grid container spacing={4}>
@@ -64,7 +101,7 @@ const RoutingPage = () => {
               </Typography>
 
               {/* Bank Dropdown */}
-              <FormControl fullWidth variant="outlined" sx={{ marginBottom: 3 }}>
+              <FormControl fullWidth variant="outlined" sx={{ marginBottom: 3 }} error={errors.bank}>
                 <InputLabel>Select Bank</InputLabel>
                 <Select value={selectedBank} onChange={handleBankChange} label="Select Bank">
                   {bankOptions.map((bank) => (
@@ -81,7 +118,11 @@ const RoutingPage = () => {
                 label="Total Transaction Count"
                 variant="outlined"
                 value={transactionCount}
-                onChange={(e) => setTransactionCount(e.target.value)}
+                onChange={(e) => {
+                  setTransactionCount(e.target.value);
+                  if (e.target.value) setErrors((prev) => ({ ...prev, transactionCount: false }));
+                }}
+                error={errors.transactionCount}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -98,7 +139,11 @@ const RoutingPage = () => {
                 label="Threshold Transaction Amount"
                 variant="outlined"
                 value={thresholdAmount}
-                onChange={(e) => setThresholdAmount(e.target.value)}
+                onChange={(e) => {
+                  setThresholdAmount(e.target.value);
+                  if (e.target.value) setErrors((prev) => ({ ...prev, thresholdAmount: false }));
+                }}
+                error={errors.thresholdAmount}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -115,7 +160,11 @@ const RoutingPage = () => {
                 label="Maximum Transaction Amount"
                 variant="outlined"
                 value={maxTransactionAmount}
-                onChange={(e) => setMaxTransactionAmount(e.target.value)}
+                onChange={(e) => {
+                  setMaxTransactionAmount(e.target.value);
+                  if (e.target.value) setErrors((prev) => ({ ...prev, maxTransactionAmount: false }));
+                }}
+                error={errors.maxTransactionAmount}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">

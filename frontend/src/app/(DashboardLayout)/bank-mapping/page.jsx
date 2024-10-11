@@ -11,20 +11,24 @@ import {
   MenuItem,
   Select,
   Button,
-  IconButton,
   InputAdornment,
-  Divider,
   Paper,
+  IconButton,
 } from "@mui/material";
-import { Add, Remove, AccountBalance, Lock, VpnKey, Fingerprint } from "@mui/icons-material"; // Icons
+import { AccountBalance, Lock, VpnKey, Fingerprint, Add, Remove } from "@mui/icons-material"; // Icons
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const BankVPASetupPage = () => {
+const BankMappingPage = () => {
   const [selectedBank, setSelectedBank] = useState(""); // Bank dropdown state
   const [loginID, setLoginID] = useState("");
   const [password, setPassword] = useState("");
   const [adf1, setAdf1] = useState("");
   const [adf2, setAdf2] = useState("");
   const [vpaCount, setVpaCount] = useState(1); // VPA count
+  const [vpas, setVpas] = useState([""]); // State for VPA inputs
+  const [errors, setErrors] = useState({}); // State for form validation errors
 
   // Bank options
   const bankOptions = ["Yes Bank", "SBI", "HDFC", "ICICI", "BOB", "Bandhan Bank", "IDFC", "Axis Bank"];
@@ -32,36 +36,83 @@ const BankVPASetupPage = () => {
   // Handle dropdown change
   const handleBankChange = (event) => {
     setSelectedBank(event.target.value);
+    setErrors((prevErrors) => ({ ...prevErrors, selectedBank: "" }));
   };
 
-  const handleSave = () => {
-    if (!selectedBank || !transactionCount || !thresholdAmount || !maxTransactionAmount) {
-      toast.error('Please fill out all fields');
-    } else {
-      toast.success('Routing details saved successfully!');
-      // Save logic here
-    }
+  // Handle VPA input change
+  const handleVpaChange = (index, value) => {
+    const updatedVpas = [...vpas];
+    updatedVpas[index] = value;
+    setVpas(updatedVpas);
+    setErrors((prevErrors) => ({ ...prevErrors, vpas: "" }));
   };
 
-
-  // Handle incrementing and decrementing VPA count
+  // Handle adding and removing VPA inputs
   const incrementVPA = () => {
+    setVpas([...vpas, ""]);
     setVpaCount(vpaCount + 1);
   };
 
   const decrementVPA = () => {
-    if (vpaCount > 1) setVpaCount(vpaCount - 1);
+    if (vpaCount > 1) {
+      setVpas(vpas.slice(0, -1));
+      setVpaCount(vpaCount - 1);
+    }
+  };
+
+  // Handle save action
+  const handleSave = async () => {
+    const validationErrors = {};
+    if (!selectedBank) validationErrors.selectedBank = "Please select a bank.";
+    if (!loginID) validationErrors.loginID = "Please enter your login ID.";
+    if (!password) validationErrors.password = "Please enter your password.";
+    if (!vpas.some((vpa) => vpa)) validationErrors.vpas = "Please enter at least one VPA.";
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error("Please fill out all required fields.");
+      return;
+    }
+
+    const payload = {
+      bank: selectedBank,
+      username: loginID,
+      password,
+      vpa: vpas.join(","),
+      adf1: adf1 || null,
+      adf2: adf2 || null,
+    };
+
+    try {
+      const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
+      const response = await axios.post("http://localhost:8080/api/v1/acquirer/saveMapping", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Bank mapping saved successfully!");
+      } else {
+        toast.error("Failed to save bank mapping. Please try again.");
+      }
+    } catch (error) {
+      toast.error("Error occurred. Please try again.");
+      console.error("API error:", error);
+    }
   };
 
   return (
-    <Box >
+    <Box>
+      <ToastContainer /> {/* ToastContainer for toasts */}
       <Paper
         elevation={3}
         sx={{
           padding: 3,
-          backgroundColor: "#black",
+          backgroundColor: "#ffffff",
           borderRadius: "16px",
           boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)",
+          minWidth: "100vh",
         }}
       >
         <Grid container spacing={4}>
@@ -71,7 +122,9 @@ const BankVPASetupPage = () => {
               <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", color: "#1f4cb6" }}>
                 Bank and Credentials
               </Typography>
-              <FormControl fullWidth variant="outlined" sx={{ marginBottom: 3 }}>
+
+              {/* Bank Dropdown */}
+              <FormControl fullWidth variant="outlined" sx={{ marginBottom: 3 }} error={!!errors.selectedBank}>
                 <InputLabel>Select Bank</InputLabel>
                 <Select value={selectedBank} onChange={handleBankChange} label="Select Bank">
                   {bankOptions.map((bank) => (
@@ -80,14 +133,25 @@ const BankVPASetupPage = () => {
                     </MenuItem>
                   ))}
                 </Select>
+                {errors.selectedBank && (
+                  <Typography variant="caption" color="error">
+                    {errors.selectedBank}
+                  </Typography>
+                )}
               </FormControl>
 
+              {/* Login ID */}
               <TextField
                 fullWidth
                 label="Login ID"
                 variant="outlined"
                 value={loginID}
-                onChange={(e) => setLoginID(e.target.value)}
+                onChange={(e) => {
+                  setLoginID(e.target.value);
+                  setErrors((prevErrors) => ({ ...prevErrors, loginID: "" }));
+                }}
+                error={!!errors.loginID}
+                helperText={errors.loginID}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -98,13 +162,19 @@ const BankVPASetupPage = () => {
                 sx={{ marginBottom: 3 }}
               />
 
+              {/* Password */}
               <TextField
                 fullWidth
                 label="Password"
                 variant="outlined"
                 value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrors((prevErrors) => ({ ...prevErrors, password: "" }));
+                }}
+                error={!!errors.password}
+                helperText={errors.password}
                 type="password"
-                onChange={(e) => setPassword(e.target.value)}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -115,6 +185,7 @@ const BankVPASetupPage = () => {
                 sx={{ marginBottom: 3 }}
               />
 
+              {/* ADF1 */}
               <TextField
                 fullWidth
                 label="ADF1"
@@ -131,6 +202,7 @@ const BankVPASetupPage = () => {
                 sx={{ marginBottom: 3 }}
               />
 
+              {/* ADF2 */}
               <TextField
                 fullWidth
                 label="ADF2"
@@ -149,27 +221,29 @@ const BankVPASetupPage = () => {
             </Box>
           </Grid>
 
-          {/* Divider between sections */}
-          <Divider orientation="vertical" flexItem />
-
-          {/* Right Side - VPA Input and Increment/Decrement */}
-          <Grid item xs={12} md={5}>
-            <Box p={8}>
+          {/* Right Side - VPA Inputs with Add and Remove Buttons */}
+          <Grid item xs={12} md={6}>
+            <Box p={6}>
               <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", color: "#1f4cb6" }}>
                 Virtual Payment Address (VPA)
               </Typography>
 
-              {Array.from({ length: vpaCount }, (_, index) => (
+              {/* Dynamic VPA Fields */}
+              {vpas.map((vpa, index) => (
                 <TextField
                   key={index}
                   fullWidth
                   label={`VPA ${index + 1}`}
                   variant="outlined"
+                  value={vpa}
+                  onChange={(e) => handleVpaChange(index, e.target.value)}
+                  error={!!errors.vpas && !vpa}
+                  helperText={errors.vpas && !vpa ? "Please enter at least one VPA." : ""}
                   sx={{ marginBottom: 3 }}
                 />
               ))}
 
-              {/* VPA Increment and Decrement Buttons */}
+              {/* Increment and Decrement Buttons */}
               <Box display="flex" alignItems="center" justifyContent="flex-start" gap={2}>
                 <IconButton
                   onClick={decrementVPA}
@@ -189,45 +263,33 @@ const BankVPASetupPage = () => {
                   <Add />
                 </IconButton>
               </Box>
+
+              {/* Save Button */}
+              <Box mt={4}>
+                <Button
+                  variant="contained"
+                  onClick={handleSave}
+                  sx={{
+                    px: 5,
+                    py: 1.2,
+                    borderRadius: "12px",
+                    fontSize: "14px",
+                    backgroundColor: "#1976d2",
+                    "&:hover": {
+                      backgroundColor: "#1565c0",
+                    },
+                    boxShadow: "none", // Minimalistic button style
+                  }}
+                >
+                  Save
+                </Button>
+              </Box>
             </Box>
           </Grid>
         </Grid>
-        <Grid item xs={12} md={6}>
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              flexDirection="column"
-              height="100%"
-              p={3}
-            >
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: "bold", color: "#1f4cb6", marginBottom: 2 }}>
-                Save Your Mapping Details
-              </Typography>
-
-              {/* Save Button */}
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                sx={{
-                  px: 5,
-                  py: 1.2,
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                  backgroundColor: '#1976d2',
-                  '&:hover': {
-                    backgroundColor: '#1565c0',
-                  },
-                  boxShadow: 'none', // Minimalistic button style
-                }}
-              >
-                Save
-              </Button>
-            </Box>
-          </Grid>
       </Paper>
     </Box>
   );
 };
 
-export default BankVPASetupPage;
+export default BankMappingPage;
