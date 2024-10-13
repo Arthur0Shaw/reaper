@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/api/v1', // Replace with your API base URL
+  baseURL: `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1`, // Replace with your API base URL
 });
 
 // Add a request interceptor to include the token in headers

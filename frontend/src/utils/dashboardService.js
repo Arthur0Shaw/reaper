@@ -3,7 +3,7 @@ import axios from 'axios';
 const fetchDashboardData = async () => {
   try {
     const token = localStorage.getItem('token'); // Retrieve the token from localStorage
-    const response = await axios.post('http://localhost:8080/api/v1/transaction/dashboard', 
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/transaction/dashboard`, 
       {
         // Payload for the POST request
         dateIndexFrom: "20240916",

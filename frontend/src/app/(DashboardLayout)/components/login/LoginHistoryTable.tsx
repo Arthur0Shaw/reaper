@@ -37,7 +37,7 @@ const LoginHistoryTable: React.FC = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
-      const response = await axios.get("http://localhost:8080/api/v1/users/loginHistory", {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/loginHistory`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

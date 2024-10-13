@@ -33,7 +33,7 @@ const RegisterPage = () => {
     setMessage("");
 
     try {
-      await axios.post("http://localhost:8080/api/v1/users/register", formData);
+      await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/register`, formData);
       setMessage("Registration successful!");
     } catch (err) {
       setError("Registration failed. Please check the details.");

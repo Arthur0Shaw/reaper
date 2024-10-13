@@ -62,7 +62,7 @@ const RoutingPage = () => {
 
     try {
       const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
-      const response = await axios.post("http://localhost:8080/api/v1/acquirer/txnRoutingDetails", payload, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/acquirer/txnRoutingDetails`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

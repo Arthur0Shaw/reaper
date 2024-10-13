@@ -22,7 +22,7 @@ const MerchantList: React.FC<MerchantListProps> = ({ onSelectMerchant }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
-      const response = await fetch("http://localhost:8080/api/v1/users/merchantList", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/users/merchantList`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
