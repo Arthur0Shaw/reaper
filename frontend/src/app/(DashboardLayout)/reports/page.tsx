@@ -11,18 +11,19 @@ import {
   InputLabel,
   Typography,
   CircularProgress,
+  SelectChangeEvent, // Import SelectChangeEvent from @mui/material
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import moment from "moment";
 import axios from "axios";
 import ReportTable from "../components/dashboard/ReportTable"; // Ensure correct path to ReportTable
-import { IconFilter, IconCalendar, IconReportSearch, IconMoodSad } from "@tabler/icons-react"; // Icons for no data, filters, etc.
+import { IconCalendar, IconReportSearch, IconMoodSad } from "@tabler/icons-react"; // Icons for no data, filters, etc.
 
 const Reports = () => {
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // State for filters
   const [selectedDateFrom, setSelectedDateFrom] = useState(moment());
@@ -42,6 +43,7 @@ const Reports = () => {
   const fetchReportData = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
 
       const token = localStorage.getItem("token"); // Ensure token is present
       if (!token) {
@@ -70,9 +72,13 @@ const Reports = () => {
       const data = response.data.transactions;
       setTransactions(data);
       setLoading(false);
-    } catch (error) {
-      console.error("Error fetching report data:", error);
-      setError(error.message);
+    } catch (err) {
+      console.error("Error fetching report data:", err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
       setLoading(false);
     }
   }, [selectedDateFrom, selectedDateTo, status, id, acquirerReferenceId, merchantOrderId]);
@@ -94,9 +100,13 @@ const Reports = () => {
     setDebounceTimer(setTimeout(fetchReportData, 2000));
   };
 
-  const handleDateFromChange = (newDate: any) => setSelectedDateFrom(newDate);
-  const handleDateToChange = (newDate: any) => setSelectedDateTo(newDate);
-  const handleStatusChange = (e: React.ChangeEvent<{ value: unknown }>) => setStatus(e.target.value as string);
+  const handleDateFromChange = (newDate: moment.Moment | null) => setSelectedDateFrom(newDate || moment());
+  const handleDateToChange = (newDate: moment.Moment | null) => setSelectedDateTo(newDate || moment());
+
+  // Update event type for the Select change handler
+  const handleStatusChange = (event: SelectChangeEvent<string>) => {
+    setStatus(event.target.value as string);
+  };
 
   return (
     <Box p={4} sx={{ backgroundColor: "#f0f4f8", minHeight: "100vh" }}>
@@ -119,51 +129,49 @@ const Reports = () => {
             label="From Date"
             value={selectedDateFrom}
             onChange={handleDateFromChange}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                sx={{
+            slotProps={{
+              textField: {
+                sx: {
                   backgroundColor: "#ffffff",
                   borderRadius: "8px",
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "8px",
                   },
-                }}
-                InputProps={{
+                },
+                InputProps: {
                   startAdornment: (
                     <IconCalendar
                       size={18}
                       style={{ marginRight: "8px", color: "#888" }}
                     />
                   ),
-                }}
-              />
-            )}
+                },
+              },
+            }}
           />
           <DatePicker
             label="To Date"
             value={selectedDateTo}
             onChange={handleDateToChange}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                sx={{
+            slotProps={{
+              textField: {
+                sx: {
                   backgroundColor: "#ffffff",
                   borderRadius: "8px",
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "8px",
                   },
-                }}
-                InputProps={{
+                },
+                InputProps: {
                   startAdornment: (
                     <IconCalendar
                       size={18}
                       style={{ marginRight: "8px", color: "#888" }}
                     />
                   ),
-                }}
-              />
-            )}
+                },
+              },
+            }}
           />
         </LocalizationProvider>
 
@@ -279,25 +287,7 @@ const Reports = () => {
           </Typography>
         </Box>
       ) : (
-        <Box
-          // sx={{
-          //   backgroundColor: "#fff",
-          //   borderRadius: "12px",
-          //   padding: "1.5rem",
-          //   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-          // }}
-        >
-          {/* <Typography
-            variant="h6"
-            sx={{
-              mb: 2,
-              fontWeight: "bold",
-              color: "#1565c0",
-              textAlign: "center",
-            }}
-          >
-            Transaction Report
-          </Typography> */}
+        <Box>
           <ReportTable transactions={transactions} /> {/* Render the table */}
         </Box>
       )}

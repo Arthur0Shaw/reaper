@@ -7,15 +7,20 @@ import TrafficDistribution from "@/app/(DashboardLayout)/components/dashboard/Tr
 import ProductSales from "@/app/(DashboardLayout)/components/dashboard/ProductSales";
 import fetchDashboardData from "@/utils/dashboardService";
 
+interface DashboardData {
+  dateWiseTransactionCount: { [key: string]: number };
+  dateWiseTransactionAmount: { [key: string]: number };
+}
+
 const Dashboard = () => {
-  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [totalCount, setTotalCount] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Update total count and total amount based on API response
-  const updateTotals = (data) => {
+  const updateTotals = (data: DashboardData) => {
     const totalTransactionCount = Object.values(data.dateWiseTransactionCount || {}).reduce((acc, val) => acc + val, 0);
     const totalTransactionAmount = Object.values(data.dateWiseTransactionAmount || {}).reduce((acc, val) => acc + val, 0);
 
@@ -30,7 +35,7 @@ const Dashboard = () => {
         setDashboardData(data);
         updateTotals(data); // Update total count and amount
         setLoading(false);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Error fetching dashboard data:", err);
         setError(err.message);
         setLoading(false);

@@ -5,7 +5,7 @@ import { Upgrade } from "./Updrade";
 
 interface ItemType {
   isMobileSidebarOpen: boolean;
-  onSidebarClose: (event: React.MouseEvent<HTMLElement>) => void;
+  onSidebarClose: () => void; // Changed type to parameter-less function
   isSidebarOpen: boolean;
 }
 
@@ -36,7 +36,7 @@ const Sidebar = ({
           variant="permanent"
           PaperProps={{
             sx: {
-              boxShadow:  "0 9px 17.5px rgb(0,0,0,0.05)",
+              boxShadow: "0 9px 17.5px rgb(0,0,0,0.05)",
               width: sidebarWidth,
               boxSizing: "border-box",
               borderRight: 0,
@@ -66,7 +66,7 @@ const Sidebar = ({
               {/* ------------------------------------------- */}
               {/* Sidebar Items */}
               {/* ------------------------------------------- */}
-              <SidebarItems />
+              <SidebarItems toggleMobileSidebar={() => {}} />
               {/* <Upgrade /> */}
             </Box>
           </Box>
@@ -97,7 +97,7 @@ const Sidebar = ({
       {/* ------------------------------------------- */}
       {/* Sidebar For Mobile */}
       {/* ------------------------------------------- */}
-      <SidebarItems />
+      <SidebarItems toggleMobileSidebar={onSidebarClose} />
       {/* <Upgrade /> */}
     </Drawer>
   );

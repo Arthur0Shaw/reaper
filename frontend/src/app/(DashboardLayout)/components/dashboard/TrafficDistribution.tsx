@@ -4,10 +4,15 @@ import { IconCheck, IconX, IconClock } from "@tabler/icons-react";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
+import { ApexOptions } from "apexcharts"; // Import ApexOptions
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const TrafficDistribution = ({ totalCount }) => {
+interface TrafficDistributionProps {
+  totalCount: number; // Define the type of totalCount
+}
+
+const TrafficDistribution: React.FC<TrafficDistributionProps> = ({ totalCount }) => {
   const theme = useTheme();
 
   // Dynamic values for success, failure, and pending based on totalCount
@@ -21,9 +26,9 @@ const TrafficDistribution = ({ totalCount }) => {
   const pendingColor = "#ffa726"; // Subtle orange for pending
 
   // Chart options with minimalistic colors and labels
-  const chartOptions = {
+  const chartOptions: ApexOptions = {
     chart: {
-      type: "donut",
+      type: "donut", // Explicitly set the chart type
       fontFamily: "'Plus Jakarta Sans', sans-serif;",
       foreColor: "#adb0bb",
       toolbar: { show: false },

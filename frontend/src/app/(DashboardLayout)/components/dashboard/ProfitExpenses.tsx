@@ -1,19 +1,26 @@
 "use client"; // Ensure this is a client-side component
 
 import React, { useEffect, useState } from "react";
-import { Box, IconButton, Menu, MenuItem, TextField, Select, FormControl, InputLabel } from "@mui/material";
+import { Box, IconButton, Menu, MenuItem, TextField, Select, FormControl, InputLabel, SelectChangeEvent } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import dynamic from "next/dynamic";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useTheme } from "@mui/material/styles";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import axios from "axios";
+import { ApexOptions } from "apexcharts"; // Import ApexOptions
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const ProfitExpenses = ({ dateWiseTransactionCount, dateWiseTransactionAmount, onFilterChange }) => {
+interface ProfitExpensesProps {
+  dateWiseTransactionCount: { [key: string]: number }; // Assuming dateWiseTransactionCount is an object with string keys and number values
+  dateWiseTransactionAmount: { [key: string]: number }; // Assuming dateWiseTransactionAmount is an object with string keys and number values
+  onFilterChange: (data: any) => void; // Assuming onFilterChange is a function that takes data
+}
+
+const ProfitExpenses: React.FC<ProfitExpensesProps> = ({ dateWiseTransactionCount, dateWiseTransactionAmount, onFilterChange }) => {
   const [chartData, setChartData] = useState({
     categories: Object.keys(dateWiseTransactionCount || {}),
     countSeries: Object.values(dateWiseTransactionCount || {}),
@@ -34,14 +41,14 @@ const ProfitExpenses = ({ dateWiseTransactionCount, dateWiseTransactionAmount, o
   const secondary = "#a9e3f4";
 
   // State for Date Range and Status
-  const [selectedDateFrom, setSelectedDateFrom] = useState(moment());
-  const [selectedDateTo, setSelectedDateTo] = useState(moment());
+  const [selectedDateFrom, setSelectedDateFrom] = useState<Moment | null>(moment());
+  const [selectedDateTo, setSelectedDateTo] = useState<Moment | null>(moment());
   const [status, setStatus] = useState("");
 
   // Define status options
   const statusOptions = ["FAILURE", "SUCCESS", "PENDING"];
 
-  const fetchDashboardData = async (payload) => {
+  const fetchDashboardData = async (payload: any) => {
     try {
       const token = localStorage.getItem('token'); // Assuming token is stored in localStorage
       const response = await axios.post('http://localhost:8080/api/v1/transaction/dashboard', payload, {
@@ -66,8 +73,8 @@ const ProfitExpenses = ({ dateWiseTransactionCount, dateWiseTransactionAmount, o
   // Function to trigger API call
   const handleFilterChange = () => {
     const payload = {
-      dateIndexFrom: selectedDateFrom.format("YYYYMMDD"),
-      dateIndexTo: selectedDateTo.format("YYYYMMDD"),
+      dateIndexFrom: selectedDateFrom?.format("YYYYMMDD") || "",
+      dateIndexTo: selectedDateTo?.format("YYYYMMDD") || "",
       status: status || null,
     };
 
@@ -76,18 +83,18 @@ const ProfitExpenses = ({ dateWiseTransactionCount, dateWiseTransactionAmount, o
   };
 
   // Handle date changes for 'From' date
-  const handleDateFromChange = (newDate: any) => {
+  const handleDateFromChange = (newDate: Moment | null) => {
     setSelectedDateFrom(newDate);
   };
 
   // Handle date changes for 'To' date
-  const handleDateToChange = (newDate: any) => {
+  const handleDateToChange = (newDate: Moment | null) => {
     setSelectedDateTo(newDate);
   };
 
   // Handle status change
-  const handleStatusChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setStatus(event.target.value as string);
+  const handleStatusChange = (event: SelectChangeEvent<string>) => {
+    setStatus(event.target.value);
   };
 
   // Trigger API call when date or status is updated
@@ -95,9 +102,9 @@ const ProfitExpenses = ({ dateWiseTransactionCount, dateWiseTransactionAmount, o
     handleFilterChange();
   }, [selectedDateFrom, selectedDateTo, status]);
 
-  const optionscolumnchart = {
+  const optionscolumnchart: ApexOptions = {
     chart: {
-      type: "bar",
+      type: "bar", // Explicitly set the chart type
       toolbar: { show: true },
       height: 250, // Slim chart height
     },
@@ -135,42 +142,44 @@ const ProfitExpenses = ({ dateWiseTransactionCount, dateWiseTransactionAmount, o
         </>
       }
     >
-      <Box display="flex" alignItems="center" justifyContent="flex-start" mb={2} gap={2}>
-        <LocalizationProvider dateAdapter={AdapterMoment}>
-          <DatePicker
-            label="From Date"
-            value={selectedDateFrom}
-            onChange={handleDateFromChange}
-            renderInput={(params) => <TextField {...params} />}
-          />
-        </LocalizationProvider>
-
-        <LocalizationProvider dateAdapter={AdapterMoment}>
-          <DatePicker
-            label="To Date"
-            value={selectedDateTo}
-            onChange={handleDateToChange}
-            renderInput={(params) => <TextField {...params} />}
-          />
-        </LocalizationProvider>
-
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Status</InputLabel>
-          <Select value={status} label="Status" onChange={handleStatusChange}>
-            <MenuItem value="">
-              <em>All</em>
-            </MenuItem>
-            {statusOptions.map((option) => (
-              <MenuItem key={option} value={option}>
-                {option}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-
       <Box>
-        <Chart options={optionscolumnchart} series={seriescolumnchart} type="bar" height="250px" width={"100%"} height={500} />
+        <Box display="flex" alignItems="center" justifyContent="flex-start" mb={2} gap={2}>
+          <LocalizationProvider dateAdapter={AdapterMoment}>
+            <DatePicker
+              label="From Date"
+              value={selectedDateFrom}
+              onChange={handleDateFromChange}
+              slots={{ textField: TextField }} // Updated from renderInput to slots
+            />
+          </LocalizationProvider>
+
+          <LocalizationProvider dateAdapter={AdapterMoment}>
+            <DatePicker
+              label="To Date"
+              value={selectedDateTo}
+              onChange={handleDateToChange}
+              slots={{ textField: TextField }} // Updated from renderInput to slots
+            />
+          </LocalizationProvider>
+
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Status</InputLabel>
+            <Select value={status} label="Status" onChange={handleStatusChange}>
+              <MenuItem value="">
+                <em>All</em>
+              </MenuItem>
+              {statusOptions.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Box>
+          <Chart options={optionscolumnchart} series={seriescolumnchart} type="bar" width={"100%"} height={500} />
+        </Box>
       </Box>
     </DashboardCard>
   );

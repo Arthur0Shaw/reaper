@@ -1,38 +1,49 @@
-"use client";
-
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { List, ListItem, ListItemText, CircularProgress, Typography, Box, Paper } from "@mui/material";
+import { Typography, Box, List, ListItem, ListItemText, CircularProgress } from "@mui/material";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
-const MerchantList = ({ onSelectMerchant }) => {
-  const [merchants, setMerchants] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+interface Merchant {
+  id: string; // Assuming 'id' is a string, adjust if necessary
+  businessName: string;
+  email: string;
+}
 
+interface MerchantListProps {
+  onSelectMerchant: (merchant: Merchant) => void; // Callback function that takes a Merchant object
+}
+
+const MerchantList: React.FC<MerchantListProps> = ({ onSelectMerchant }) => {
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch the merchants list
   const fetchMerchants = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:8080/api/v1/users/merchantList", {
+      setLoading(true);
+      const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
+      const response = await fetch("http://localhost:8080/api/v1/users/merchantList", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      setMerchants(response.data);
+      const data = await response.json();
+      setMerchants(data);
       setLoading(false);
     } catch (error) {
+      console.error("Error fetching merchants:", error);
       setError("Failed to load merchants.");
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMerchants();
+    fetchMerchants(); // Fetch the merchants when the component mounts
   }, []);
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="150px">
+      <Box display="flex" justifyContent="center" alignItems="center" height="200px">
         <CircularProgress />
       </Box>
     );
@@ -40,33 +51,34 @@ const MerchantList = ({ onSelectMerchant }) => {
 
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="150px">
-        <ErrorOutlineIcon color="error" sx={{ fontSize: 50, mr: 2 }} />
-        <Typography color="error">{error}</Typography>
+      <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" height="200px">
+        <ErrorOutlineIcon color="error" sx={{ fontSize: 50, mb: 2 }} />
+        <Typography color="error" textAlign="center">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!merchants.length) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" height="200px">
+        <Typography variant="h6" color="textSecondary">
+          No merchants found.
+        </Typography>
       </Box>
     );
   }
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom sx={{ fontWeight: "600", color: "#333" }}>
-        Select a Merchant
+    <Box sx={{ padding: "1.5rem", backgroundColor: "#fff", borderRadius: "12px", boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.08)" }}>
+      <Typography variant="h5" sx={{ fontWeight: "600", mb: 2 }}>
+        Merchant List
       </Typography>
-      <List sx={{ maxHeight: "400px", overflow: "auto", backgroundColor: "#fdfdfd", borderRadius: "12px" }}>
+      <List>
         {merchants.map((merchant) => (
-          <ListItem
-            button
-            key={merchant.id}
-            onClick={() => onSelectMerchant(merchant)}
-            sx={{
-              backgroundColor: "#f9f9f9",
-              mb: 1,
-              borderRadius: "8px",
-              transition: "background-color 0.3s, box-shadow 0.3s",
-              '&:hover': { backgroundColor: "#e0f7fa", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)" },
-            }}
-          >
-            <ListItemText primary={merchant.businessName} sx={{ color: "#333" }} />
+          <ListItem button key={merchant.id} onClick={() => onSelectMerchant(merchant)}>
+            <ListItemText primary={merchant.businessName} secondary={merchant.email} />
           </ListItem>
         ))}
       </List>

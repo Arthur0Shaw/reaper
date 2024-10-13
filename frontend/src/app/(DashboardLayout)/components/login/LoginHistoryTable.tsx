@@ -16,10 +16,21 @@ import { IconMoodSad } from "@tabler/icons-react";
 import axios from "axios";
 import TableContainer from "@mui/material/TableContainer";
 
-const LoginHistoryTable = () => {
-  const [loginHistory, setLoginHistory] = useState([]);
+interface LoginEvent {
+  id: string; // Assuming 'id' is a string, adjust if necessary
+  userName: string;
+  userType: string;
+  description: string;
+  ipAddress: string;
+  os: string;
+  browser: string;
+  createdAt: string; // Assuming createdAt is a string representation of date/time
+}
+
+const LoginHistoryTable: React.FC = () => {
+  const [loginHistory, setLoginHistory] = useState<LoginEvent[]>([]); // Define the type of loginHistory
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch the login history
   const fetchLoginHistory = async () => {
@@ -62,7 +73,14 @@ const LoginHistoryTable = () => {
 
   if (!loginHistory.length) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" height="300px" sx={{ backgroundColor: "#e3f2fd", borderRadius: "12px", padding: "2rem", textAlign: "center" }}>
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        flexDirection="column"
+        height="300px"
+        sx={{ backgroundColor: "#e3f2fd", borderRadius: "12px", padding: "2rem", textAlign: "center" }}
+      >
         <IconMoodSad size={48} color="#90a4ae" />
         <Typography variant="h6" color="textSecondary" sx={{ mt: 2 }}>
           No login history found.
@@ -72,9 +90,14 @@ const LoginHistoryTable = () => {
   }
 
   return (
-    <Box sx={{ backgroundColor: "#fff", borderRadius: "16px", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)", padding: "2rem", mt: 4 }}>
+    <Box
+      sx={{ backgroundColor: "#fff", borderRadius: "16px", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.05)", padding: "2rem", mt: 4 }}
+    >
       {/* Title Section */}
-      <Typography variant="h5" sx={{ mb: 3, textAlign: "center", fontWeight: "bold", color: "#1565c0", letterSpacing: "0.5px" }}>
+      <Typography
+        variant="h5"
+        sx={{ mb: 3, textAlign: "center", fontWeight: "bold", color: "#1565c0", letterSpacing: "0.5px" }}
+      >
         Login History
       </Typography>
 

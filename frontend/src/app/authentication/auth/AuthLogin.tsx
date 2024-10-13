@@ -54,7 +54,7 @@ const AuthLogin = ({ title, subtitle, subtext }: any) => {
               variant="outlined"
               fullWidth
               value={email}
-              onChange={(e) => setEmail(e.target.value)} // Capture email input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} // Capture email input
               required
             />
           </Box>
@@ -73,7 +73,7 @@ const AuthLogin = ({ title, subtitle, subtext }: any) => {
               variant="outlined"
               fullWidth
               value={password}
-              onChange={(e) => setPassword(e.target.value)} // Capture password input
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)} // Capture password input
               required
             />
           </Box>

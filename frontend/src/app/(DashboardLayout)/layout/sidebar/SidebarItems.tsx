@@ -5,9 +5,13 @@ import { Box, List } from "@mui/material";
 import NavItem from "./NavItem";
 import NavGroup from "./NavGroup/NavGroup";
 
-const SidebarItems = ({ toggleMobileSidebar }: any) => {
+interface SidebarItemsProps {
+  toggleMobileSidebar: () => void; // Define the type for the prop
+}
+
+const SidebarItems: React.FC<SidebarItemsProps> = ({ toggleMobileSidebar }) => {
   const pathname = usePathname();
-  const pathDirect = pathname;
+  const pathDirect = pathname || ""; // Provide a fallback value of empty string if pathname is null
 
   return (
     <Box sx={{ px: "20px" }}>

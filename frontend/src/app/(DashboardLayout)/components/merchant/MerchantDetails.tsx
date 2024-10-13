@@ -2,7 +2,16 @@ import React from "react";
 import { Typography, Box } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 
-const MerchantDetails = ({ merchant }) => {
+interface Merchant {
+  id: string;
+  businessName: string;
+  email: string;
+  mobile?: string;
+  contactPersonName?: string;
+  userStatus?: string;
+}
+
+const MerchantDetails: React.FC<{ merchant: Merchant | null }> = ({ merchant }) => {
   if (!merchant) {
     return (
       <Box

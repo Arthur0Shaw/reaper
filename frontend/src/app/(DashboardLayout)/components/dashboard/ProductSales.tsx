@@ -4,10 +4,15 @@ import { IconCurrencyRupee, IconCheck, IconX, IconClock } from "@tabler/icons-re
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import dynamic from "next/dynamic";
 import { useTheme } from "@mui/material/styles";
+import { ApexOptions } from "apexcharts"; // Import ApexOptions
 
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const ProductSales = ({ totalAmount }) => {
+interface ProductSalesProps {
+  totalAmount: number; // specify the type of totalAmount here
+}
+
+const ProductSales: React.FC<ProductSalesProps> = ({ totalAmount }) => {
   const theme = useTheme();
   const primary = theme.palette.primary.main;
 
@@ -17,9 +22,9 @@ const ProductSales = ({ totalAmount }) => {
   const pendingAmount = totalAmount * 0.1; // 10% of the total amount
 
   // Data for the sparkline chart
-  const optionscolumnchart = {
+  const optionscolumnchart: ApexOptions = {
     chart: {
-      type: "area",
+      type: "area", // Ensure this is a valid chart type from the ApexOptions type
       fontFamily: "'Plus Jakarta Sans', sans-serif;",
       foreColor: "#adb0bb",
       toolbar: { show: false },

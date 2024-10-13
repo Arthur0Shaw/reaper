@@ -12,7 +12,20 @@ import {
 import DashboardCard from "@/app/(DashboardLayout)/components/shared/DashboardCard";
 import TableContainer from "@mui/material/TableContainer";
 
-const ReportTable = ({ transactions }) => {
+interface Transaction {
+  id: string; // Assuming id is a string, adjust if it's a number
+  uniqueId: string;
+  email: string;
+  status: "SUCCESS" | "FAILURE" | "PENDING"; // Restrict status to known values
+  amount: number;
+  createdAt: string; // Assuming createdAt is a string representing the date
+}
+
+interface ReportTableProps {
+  transactions: Transaction[];
+}
+
+const ReportTable: React.FC<ReportTableProps> = ({ transactions }) => {
   return (
     <Box
       sx={{

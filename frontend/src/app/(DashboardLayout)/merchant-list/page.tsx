@@ -5,10 +5,19 @@ import { Grid, Box, Typography, Paper } from "@mui/material";
 import MerchantList from "../components/merchant/MerchantList";
 import MerchantDetails from "../components/merchant/MerchantDetails";
 
-const MerchantListPage = () => {
-  const [selectedMerchant, setSelectedMerchant] = useState(null);
+interface Merchant {
+  id: string;
+  businessName: string;
+  email: string;
+  mobile?: string;
+  contactPersonName?: string;
+  userStatus?: string;
+}
 
-  const handleSelectMerchant = (merchant) => {
+const MerchantListPage = () => {
+  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
+
+  const handleSelectMerchant = (merchant: Merchant) => {
     setSelectedMerchant(merchant);
   };
 
