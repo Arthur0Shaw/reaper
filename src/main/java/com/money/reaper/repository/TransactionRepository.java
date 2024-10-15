@@ -2,6 +2,7 @@ package com.money.reaper.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.mongodb.repository.Aggregation;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -60,4 +61,14 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
 
 	@Query("{ 'status': ?0, 'createdAt': { $lte: ?1 } }")
 	List<Transaction> findByStatusAndCreatedAtLessThanEqual(TransactionStatus status, String createdAtThreshold);
+
+	@Query(value = "{ 'uniqueId': ?0, 'dateIndex': ?1 }", fields = "{ 'amount': 1 }")
+    List<Transaction> findByUniqueIdAndDateIndex(String uniqueId, String dateIndex);
+	
+	@Aggregation(pipeline = {
+		    "{ $match: { 'dateIndex': ?0 } }",
+		    "{ $group: { _id: '$acquirer', count: { $sum: 1 } } }"
+		})
+		Map<String, Long> countTransactionsByAcquirer(String dateIndex);
+
 }

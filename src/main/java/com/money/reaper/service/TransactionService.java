@@ -1,10 +1,5 @@
 package com.money.reaper.service;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,11 +39,10 @@ public class TransactionService {
 	@Autowired
 	private TransactionRepository transactionRepository;
 
-	private final ModelMapper modelMapper = new ModelMapper(); // Direct instantiation
+	private final ModelMapper modelMapper = new ModelMapper();
 
 	public InitiateTransactionResponse initiateNewTransaction(@Valid InitiateTransactionRequest request,
 			String ipAddress) {
-
 		InitiateTransactionResponse initiateTransactionResponse;
 		try {
 			Transaction transaction = modelMapper.map(request, Transaction.class);
@@ -69,7 +63,6 @@ public class TransactionService {
 				throw new RuntimeException((String) validation[1]);
 			}
 			transaction = requestRouter.routeNewTransaction(transaction);
-
 			initiateTransactionResponse = modelMapper.map(transaction, InitiateTransactionResponse.class);
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage());

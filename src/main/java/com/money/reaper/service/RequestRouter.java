@@ -9,6 +9,7 @@ import com.money.reaper.model.Transaction;
 import com.money.reaper.repository.TransactionRepository;
 import com.money.reaper.service.acquirer.AcquirerManagerFactory;
 import com.money.reaper.service.acquirer.upigateway.UPIGatewayProcessor;
+import com.money.reaper.service.acquirer.web.WebReaderProcessor;
 import com.money.reaper.util.TransactionStatus;
 
 import io.micrometer.common.util.StringUtils;
@@ -24,6 +25,9 @@ public class RequestRouter {
 
 	@Autowired
 	private UPIGatewayProcessor upiGatewayProcessor;
+	
+	@Autowired
+	private WebReaderProcessor webReaderProcessor;
 
 	private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
 
@@ -48,6 +52,8 @@ public class RequestRouter {
 			transaction.setAcquirer(acquirer);
 			if (acquirer.equalsIgnoreCase("UPI_GATEWAY")) {
 				transaction = upiGatewayProcessor.initiatePayment(transaction);
+			}else if (acquirer.equalsIgnoreCase("WEB_READER")) {
+				transaction = webReaderProcessor.initiatePayment(transaction);
 			}
 		} catch (Exception e) {
 			logger.error("Payment initiation failed", e);
@@ -64,6 +70,9 @@ public class RequestRouter {
 			String acquirer = transaction.getAcquirer();
 			if (acquirer.equalsIgnoreCase("UPI_GATEWAY")) {
 				transaction = upiGatewayProcessor.initiatePaymentStatus(transaction);
+			}
+			if (acquirer.equalsIgnoreCase("WEB_READER")) {
+				transaction = webReaderProcessor.initiatePaymentStatus(transaction);
 			}
 		} catch (Exception e) {
 			logger.error("Transaction status enquiry failed", e);
