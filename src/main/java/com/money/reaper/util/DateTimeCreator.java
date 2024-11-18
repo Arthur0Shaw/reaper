@@ -30,4 +30,11 @@ public class DateTimeCreator {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		return nowMinus15Minutes.format(formatter);
 	}
+
+	public static String getTimeBeforeSeconds(int seconds) {
+		LocalDateTime nowMinusSeconds = LocalDateTime.now().minusSeconds(seconds);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		return nowMinusSeconds.format(formatter);
+	}
+
 }

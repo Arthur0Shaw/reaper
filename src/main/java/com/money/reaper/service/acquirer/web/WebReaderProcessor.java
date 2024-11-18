@@ -53,7 +53,7 @@ public class WebReaderProcessor {
 				transaction.setPgResponseMessage(TransactionStatus.FAILURE.getDisplayName());
 				return transaction;
 			}
-
+			transaction.setAcquirer(acquirer);
 			String vpa = getRandomVpa(acquirer);
 			String businessName;
 			if (userIdMap.containsKey(transaction.getUniqueId())) {
@@ -139,10 +139,4 @@ public class WebReaderProcessor {
 		upiApps.put("UPI_INTENT", plainUpiIntent);
 		return upiApps.toString();
 	}
-
-	public Transaction initiatePaymentStatus(Transaction transaction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

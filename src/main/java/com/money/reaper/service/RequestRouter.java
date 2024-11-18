@@ -10,6 +10,7 @@ import com.money.reaper.repository.TransactionRepository;
 import com.money.reaper.service.acquirer.AcquirerManagerFactory;
 import com.money.reaper.service.acquirer.upigateway.UPIGatewayProcessor;
 import com.money.reaper.service.acquirer.web.WebReaderProcessor;
+import com.money.reaper.service.acquirer.web.WebStatusProcessor;
 import com.money.reaper.util.TransactionStatus;
 
 import io.micrometer.common.util.StringUtils;
@@ -28,6 +29,9 @@ public class RequestRouter {
 	
 	@Autowired
 	private WebReaderProcessor webReaderProcessor;
+	
+	@Autowired
+	private WebStatusProcessor webStatusProcessor;
 
 	private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
 
@@ -49,7 +53,7 @@ public class RequestRouter {
 			return saveAndReturnTransaction(transaction);
 		}
 		try {
-			transaction.setAcquirer(acquirer);
+			transaction.setAcquiringMode(acquirer);
 			if (acquirer.equalsIgnoreCase("UPI_GATEWAY")) {
 				transaction = upiGatewayProcessor.initiatePayment(transaction);
 			}else if (acquirer.equalsIgnoreCase("WEB_READER")) {
@@ -67,12 +71,12 @@ public class RequestRouter {
 			if (transaction == null) {
 				throw new IllegalArgumentException("Transaction cannot be null");
 			}
-			String acquirer = transaction.getAcquirer();
+			String acquirer = transaction.getAcquiringMode();
 			if (acquirer.equalsIgnoreCase("UPI_GATEWAY")) {
 				transaction = upiGatewayProcessor.initiatePaymentStatus(transaction);
 			}
 			if (acquirer.equalsIgnoreCase("WEB_READER")) {
-				transaction = webReaderProcessor.initiatePaymentStatus(transaction);
+				transaction = webStatusProcessor.initiatePaymentStatus(transaction);
 			}
 		} catch (Exception e) {
 			logger.error("Transaction status enquiry failed", e);

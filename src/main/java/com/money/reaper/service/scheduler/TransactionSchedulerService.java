@@ -46,4 +46,18 @@ public class TransactionSchedulerService {
 			System.out.println("No pending transactions found in past 2 minutes.");
 		}
 	}
+	
+	@Scheduled(cron = "*/30 * * * * *")
+	public void fetchPendingTransactionsPast30Seconds() {
+	    List<Transaction> pendingTransactions = transactionRepository.findByStatusAndCreatedAtLessThanEqual(
+	            TransactionStatus.PENDING, DateTimeCreator.getTimeBeforeSeconds(30));
+	    if (pendingTransactions != null && !pendingTransactions.isEmpty()) {
+	        pendingTransactions.forEach(transaction -> {
+	            requestRouter.routeTransactionStatusEnquiry(transaction);
+	        });
+	    } else {
+	        System.out.println("No pending transactions found in the past 2 minutes.");
+	    }
+	}
+
 }

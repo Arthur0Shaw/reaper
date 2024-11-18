@@ -85,6 +85,7 @@ public class Transaction {
     private String udf4;
     
     private String acquirer;
+    private String acquiringMode;
     
     private String intentURL;
 

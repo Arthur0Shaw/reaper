@@ -62,6 +62,7 @@ public class UPIGatewayProcessor {
 				JSONObject data = jsonResponse.getJSONObject("data");
 				String acquirerReferenceId = String.valueOf(data.getInt("order_id"));
 				String paymentURL = data.getString("payment_url");
+				transaction.setAcquirer("UPI_GATEWAY");
 				if (StringUtils.isNotBlank(paymentURL)) {
 					String intentUrl = extactIntentUrlFromURL(paymentURL);
 					transaction.setIntentURL(intentUrl);
